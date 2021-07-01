@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:naver_weather_scraper/result_item.dart';
 import 'package:web_scraper/web_scraper.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -9,8 +8,11 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool loaded = false;
-  List<ResultItem> resultList = List();
-  String etsyUrl = 'https://weather.naver.com/';
+  String temperature;
+  String description;
+  String rainFall;
+  String location;
+  String siteUrl = 'https://weather.naver.com/';
 
   @override
   void initState() {
@@ -24,56 +26,47 @@ class _HomeScreenState extends State<HomeScreen> {
       resizeToAvoidBottomInset: false,
       backgroundColor: Colors.white,
       body: Container(
+        alignment: Alignment.center,
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
         child: (loaded)
-            ? ListView(
-                physics: BouncingScrollPhysics(),
-                children: resultList.getRange(0, 50).toList(),
-              )
+            ? Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(temperature),
+            Text(description),
+            Text(rainFall),
+            Text(location),
+          ],
+        )
             : CircularProgressIndicator(),
       ),
     );
   }
 
   void getData() async {
-    resultList.clear();
-
-    final WebScraper webScraper = WebScraper(etsyUrl);
-    // List<Map<String, dynamic>> images = webScraper.getElement(
-    //     'i.ico_cnLazy.ico_wt1',
-    //     ['src']);
-    // List<Map<String, dynamic>> temperates = webScraper.getElement(
-    //     'text.bb_text.bb_text-0',
-    //     ['title']);
+    final WebScraper webScraper = WebScraper(siteUrl);
     if (await webScraper.loadWebPage("")) {
-      List<Map<String, dynamic>> images = webScraper.getElement(
-          'item_time',
+      List<Map<String, dynamic>> _temperature = webScraper.getElement(
+          'div.weather_area > strong.current',
+          ['title']);
+      List<Map<String, dynamic>> _description = webScraper.getElement(
+          'div.weather_area > p.summary > span.weather.before_slash',
           ['innerHtml']);
-      List<Map<String, dynamic>> times =
-          webScraper.getElement('span.time', ['innerHtml']);
+      List<Map<String, dynamic>> _rainFall = webScraper.getElement(
+          'div.weather_area > dl.summary_list > dd.desc',
+          ['innerHtml']);
+      List<Map<String, dynamic>> _location = webScraper.getElement(
+          'div.location_area > strong.location_name',
+          ['innerHtml']);
 
-      times.forEach((image) {
-        int i = times.indexOf(image);
-        print(i);
-        print(images[i]['title']);
-        resultList.add(ResultItem(
-          image: images[i]['title'],
-          time: times[i]['title'],
-        ));
-      });
       setState(() {
+        temperature = _temperature[0]['title'].replaceAll(RegExp(r'현재 온도'), '');
+        description = _description[0]['title'];
+        rainFall = _rainFall[0]['title'];
+        location = _location[0]['title'];
         loaded = true;
       });
     }
-
-    // images.forEach((image) {
-    //   int i = images.indexOf(image);
-    //   resultList.add(ResultItem(
-    //     image: images[i]['attributes']['src'],
-    //     temperate: temperates[i]['title'].toString().trim(),
-    //     time: times[i]['title'],
-    //   ));
-    // }
   }
 }

@@ -45,5 +45,3 @@ void getData() async {
 
     ex) var _location = webScraper.getElement(
               'div.location_area > strong.location_name', ['innerHtml']); **⇒⇒⇒ "남구 상대동"**
-
-    ![https://s3-us-west-2.amazonaws.com/secure.notion-static.com/8d586d25-5df9-4027-a29a-8942bf9ef6d6/Untitled.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/8d586d25-5df9-4027-a29a-8942bf9ef6d6/Untitled.png)
